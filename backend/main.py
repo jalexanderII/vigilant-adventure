@@ -93,6 +93,7 @@ def set_task_completed(username: str, task_id: int):
         return "task doesn't exist"
     return "user doesn't exist"
 
+
 @app.get("/login/{user}/{password}")
 def login(user: str, password: str):
     if user in mock_users:
@@ -113,3 +114,8 @@ def signup(user: str, password: str):
         mock_users[user] = password
         return "User created"
 
+
+@app.get("/tasks/{username}")
+def get_tasks(username: str):
+    if username in tasks_for_user:
+        return tasks_for_user.get(username)
