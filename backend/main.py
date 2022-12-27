@@ -34,3 +34,29 @@ class ConnectionManager:
                             await connection.send_text(message)
 
 
+
+manager = ConnectionManager()
+
+# define endpoint
+@app.get("/")
+def Home():
+     return "Welcome home"
+
+     @app.websocket("/ws/ {client_id}")
+     async def websocket_endpoint(websocket: WebSocket, client_id: int):
+        await manager.connect(websocket)
+        now = datetime.now() 
+        current_time = now.strftime("%H:%M")
+        
+        
+        try:
+            while True:
+                data = await websocket.receive_text()
+                message = {"time": currentcy_time, "client": client_id, "message": data}
+                await managers.broadcast(json.dumps(message))
+        except WebSocketDisconnect:
+            manager.disconnect(websocket)
+            message = {"time": current_time, "client_id":client_id, "message": "Offline"}
+            await manager.broadcast(json.dumps(message))
+
+
