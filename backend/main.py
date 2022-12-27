@@ -18,9 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from collections import defaultdict
-
 tasks_for_user = defaultdict(list)
+mock_users = {"armandogalvan1474@gmail.com": "1234"}
 
 
 class ConnectionManager:
@@ -93,3 +92,24 @@ def set_task_completed(username: str, task_id: int):
                 return task
         return "task doesn't exist"
     return "user doesn't exist"
+
+@app.get("/login/{user}/{password}")
+def login(user: str, password: str):
+    if user in mock_users:
+        db_password = mock_users.get(user)
+        if db_password == password:
+            return "True"
+        else:
+            return "Wrong Password"
+    else:
+        return "User not found"
+
+
+@app.post("/signup/{user}/{password}")
+def signup(user: str, password: str):
+    if user in mock_users:
+        return "User already exists"
+    else:
+        mock_users[user] = password
+        return "User created"
+
