@@ -1,3 +1,4 @@
+# https://www.youtube.com/watch?v=nZhAW-JQ8NM&t=167
 from typing import List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,14 +17,14 @@ app.add_middleware(
 
 
 class ConnectionManager:
-    def __init__(self)->None:
+    def __init__(self) -> None:
         self.active_connections: List[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
 
-    def disconnect(self, websocket:WebSocket):
+    def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -34,20 +35,19 @@ class ConnectionManager:
             await connection.send_text(message)
 
 
-
 manager = ConnectionManager()
 
 # define endpoint
 @app.get("/")
 def Home():
-     return "Welcome home"
+    return "Welcome home"
+
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
-    now = datetime.now() 
+    now = datetime.now()
     current_time = now.strftime("%H:%M")
-
 
     try:
         while True:
@@ -56,7 +56,5 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             await manager.broadcast(json.dumps(message))
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        message = {"time": current_time, "client_id":client_id, "message": "Offline"}
+        message = {"time": current_time, "client_id": client_id, "message": "Offline"}
         await manager.broadcast(json.dumps(message))
-
-
