@@ -19,7 +19,12 @@ app.add_middleware(
 )
 
 tasks_for_user = defaultdict(list)
-mock_users = {"armandogalvan1474@gmail.com": "1234"}
+mock_users = {
+    "joella@gmail.com": "1234",
+    "armando@gmail.com": "1234",
+    "jerod@gmail.com": "1234",
+    "joel@gmail.com": "1234",
+}
 
 
 class ConnectionManager:
