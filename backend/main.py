@@ -15,6 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+mock_users = {"armandogalvan1474@gmail.com": "1234"}
+
 
 class ConnectionManager:
     def __init__(self) -> None:
@@ -58,3 +60,24 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         manager.disconnect(websocket)
         message = {"time": current_time, "client_id": client_id, "message": "Offline"}
         await manager.broadcast(json.dumps(message))
+
+
+@app.get("/login/{user}/{password}")
+def login(user: str, password: str):
+    if user in mock_users:
+        db_password = mock_users.get(user)
+        if db_password == password:
+            return "True"
+        else:
+            return "Wrong Password"
+    else:
+        return "User not found"
+
+
+@app.post("/signup/{user}/{password}")
+def signup(user: str, password: str):
+    if user in mock_users:
+        return "User already exists"
+    else:
+        mock_users[user] = password
+        return "User created"
