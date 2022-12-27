@@ -1,15 +1,14 @@
 import * as React from 'react';
-import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
-import CommentIcon from '@mui/icons-material/Comment';
+import DetailsIcon from '@mui/icons-material/Details';
 
-export default function Task() {
-  const [checked, setChecked] = React.useState([0]);
+function Task(props) {
+  const [checked, setChecked] = React.useState([]);
 
   const handleToggle = (value) => () => {
     const currentIndex = checked.indexOf(value);
@@ -24,36 +23,31 @@ export default function Task() {
     setChecked(newChecked);
   };
 
-  return (
-    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-      {[0, 1, 2, 3].map((value) => {
-        const labelId = `checkbox-list-label-${value}`;
-
         return (
           <ListItem
-            key={value}
+            component="span" sx={{ p: 3, border: '1px solid grey' }}
+            key={props.value}
             secondaryAction={
               <IconButton edge="end" aria-label="comments">
-                <CommentIcon />
+                <DetailsIcon /> {props.value.priority}
               </IconButton>
             }
             disablePadding
           >
-            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
+            <ListItemButton role={undefined} onClick={handleToggle(props.value)} dense>
               <ListItemIcon>
                 <Checkbox
                   edge="start"
-                  checked={checked.indexOf(value) !== -1}
+                  checked={checked.indexOf(props.value) !== -1}
                   tabIndex={-1}
                   disableRipple
-                  inputProps={{ 'aria-labelledby': labelId }}
+                  inputProps={{ 'aria-labelledby': props.labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+              <ListItemText id={props.labelId} primary={`${props.value.content}`} />
             </ListItemButton>
           </ListItem>
         );
-      })}
-    </List>
-  );
 }
+
+export default Task;

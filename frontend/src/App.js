@@ -1,13 +1,12 @@
-import './App.css';
-import TaskTable from './Components/TaskTable/TaskTable';
+import "./App.css";
+import ChatBox from "./Components/ChatBox/ChatBox";
 
-function App(){
+function App() {
   return (
     <div>
-      <TaskTable />
+      <ChatBox />
     </div>
   );
 }
 
 export default App;
-
