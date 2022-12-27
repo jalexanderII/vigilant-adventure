@@ -1,9 +1,12 @@
 # https://www.youtube.com/watch?v=nZhAW-JQ8NM&t=167
+from collections import defaultdict
+from datetime import datetime
 from typing import List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
 import json
+
+from models.tasks.tasks import Task
 
 app = FastAPI()
 
@@ -14,6 +17,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from collections import defaultdict
+
+tasks_for_user = defaultdict(list)
 
 
 class ConnectionManager:
@@ -58,3 +65,31 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         manager.disconnect(websocket)
         message = {"time": current_time, "client_id": client_id, "message": "Offline"}
         await manager.broadcast(json.dumps(message))
+
+
+@app.post("/create_task/{content}/{username}/{priority}")
+def create_task(content: str, username: str, priority: str):
+    new_task = Task(
+        content=content,
+        completed=False,
+        username=username,
+        created_at=datetime.now(),
+        completed_at=None,
+        priority=priority,
+        task_id=len(tasks_for_user[username]) + 1,
+    )
+    tasks_for_user[username].append(new_task)
+    return tasks_for_user
+
+
+@app.post("/set_task_completed/{username}/{task_id}")
+def set_task_completed(username: str, task_id: int):
+    if username in tasks_for_user:
+        tasks_list = tasks_for_user.get(username)
+        for task in tasks_list:
+            if task.task_id == task_id:
+                task.completed = True
+                task.completed_at = datetime.now()
+                return task
+        return "task doesn't exist"
+    return "user doesn't exist"

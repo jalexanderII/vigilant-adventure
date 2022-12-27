@@ -1,11 +1,7 @@
-import datetime
+from datetime import datetime
 import enum
+from typing import Optional
 from pydantic import BaseModel
-
-
-class Priority(str, enum):
-    urgent = "urgent"
-    normal = "normal"
 
 
 class Task(BaseModel):
@@ -13,5 +9,6 @@ class Task(BaseModel):
     completed: bool
     username: str
     created_at: datetime
-    completed_at: datetime
-    priority: Priority
+    completed_at: Optional[datetime]
+    priority: str
+    task_id: int
