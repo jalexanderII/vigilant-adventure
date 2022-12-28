@@ -132,3 +132,4 @@ dmypy.json
 ./backend/.idea
 ./backend/venv/
 ./backend/env/
+./frontend/.idea
