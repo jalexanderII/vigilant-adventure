@@ -19,7 +19,12 @@ app.add_middleware(
 )
 
 tasks_for_user = defaultdict(list)
-mock_users = {"armandogalvan1474@gmail.com": "1234"}
+mock_users = {
+    "joella@gmail.com": "1234",
+    "armando@gmail.com": "1234",
+    "jerod@gmail.com": "1234",
+    "joel@gmail.com": "1234",
+}
 
 
 class ConnectionManager:
@@ -119,3 +124,15 @@ def signup(user: str, password: str):
 def get_tasks(username: str):
     if username in tasks_for_user:
         return tasks_for_user.get(username)
+
+
+@app.delete("/task/{username}/{task_id}")
+def task_delete(task_id: int, username: str):
+    if username in tasks_for_user:
+        tasks_list = tasks_for_user.get(username)
+        for task in tasks_list:
+            if task.task_id == task_id:
+                tasks_list.remove(task)
+            return task
+        return "task doesn't exist"
+    return "user doesn't exist"
