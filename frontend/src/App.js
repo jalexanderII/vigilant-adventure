@@ -1,10 +1,10 @@
 import "./App.css";
-import ChatBox from "./Components/ChatBox/ChatBox";
+import TaskTable from "./Components/TaskTable/TaskTable";
 
 function App() {
   return (
     <div>
-      <ChatBox />
+      <TaskTable />
     </div>
   );
 }

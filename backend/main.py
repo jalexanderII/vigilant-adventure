@@ -1,12 +1,20 @@
 # https://www.youtube.com/watch?v=nZhAW-JQ8NM&t=167
+import json
 from collections import defaultdict
 from datetime import datetime
 from typing import List
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
-import json
 
+from dotenv import load_dotenv
+from fastapi import FastAPI, status
+from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from database.db import initiate_mongo_client
 from models.tasks.tasks import Task
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -26,6 +34,8 @@ mock_users = {
     "joel@gmail.com": "1234",
 }
 
+taskDb = initiate_mongo_client()
+
 
 class ConnectionManager:
     def __init__(self) -> None:
@@ -38,7 +48,8 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
+    @staticmethod
+    async def send_personal_message(message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
     async def broadcast(self, message: str):
@@ -47,6 +58,7 @@ class ConnectionManager:
 
 
 manager = ConnectionManager()
+
 
 # define endpoint
 @app.get("/")
@@ -71,8 +83,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         await manager.broadcast(json.dumps(message))
 
 
-@app.post("/create_task/{content}/{username}/{priority}")
-def create_task(content: str, username: str, priority: str):
+@app.post("/create_task/{content}/{username}/{priority}", response_description="Add new task", response_model=Task)
+async def create_task(content: str, username: str, priority: str):
     new_task = Task(
         content=content,
         completed=False,
@@ -82,8 +94,11 @@ def create_task(content: str, username: str, priority: str):
         priority=priority,
         task_id=len(tasks_for_user[username]) + 1,
     )
-    tasks_for_user[username].append(new_task)
-    return tasks_for_user
+    encoded_task = jsonable_encoder(new_task)
+    task = await taskDb.insert_one(encoded_task)
+    created_task = await taskDb.find_one({"_id": task.inserted_id})
+    tasks_for_user[username].append(created_task)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_task)
 
 
 @app.post("/set_task_completed/{username}/{task_id}")
@@ -120,10 +135,10 @@ def signup(user: str, password: str):
         return "User created"
 
 
-@app.get("/tasks/{username}")
-def get_tasks(username: str):
-    if username in tasks_for_user:
-        return tasks_for_user.get(username)
+@app.get("/tasks/{username}", response_description="List all tasks for user", response_model=List[Task])
+async def get_tasks(username: str):
+    tasks = await taskDb.find({"username": username}).to_list()
+    return tasks
 
 
 @app.delete("/task/{username}/{task_id}")
