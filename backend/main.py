@@ -136,3 +136,15 @@ def task_delete(task_id: int, username: str):
             return task
         return "task doesn't exist"
     return "user doesn't exist"
+
+
+@app.get("/completed_tasks/{username}")
+def get_completed_tasks(task_id: int, username: str):
+    completed_task = []
+    if username in tasks_for_user:
+        tasks_list = tasks_for_user.get(username)
+        for task in tasks_for_user:
+            if task.completed == True:
+                completed_task.append(task)
+        return completed_task
+    return "user doesn't exist"
